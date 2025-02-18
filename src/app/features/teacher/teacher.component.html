@@ -1,1 +1,34 @@
-<p>teacher works!</p>
+<div class="container">
+  <div class="row mt-3">
+    <h1 class="text-center">Teachers Overview</h1>
+  </div>
+  <div class="card mt-3">
+    <div class="card-body">
+      <div class="row">
+        <div class="col-12 d-flex justify-content-end align-items-center" *ngIf="isAdmin">
+          <button type="button" class="btn btn-primary">Add Teacher</button>
+        </div>
+      </div>
+      <div class="row mt-3">
+        <input type="text" class="form-control" placeholder="Search Teacher" [(ngModel)]="searchParam.search" (input)="applyFilter()">
+      </div>
+      <table class="table mt-3">
+        <thead>
+        <tr>
+          <th>First Name</th>
+          <th>Last Name</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr *ngFor="let teacher of teachers | paginate:
+        { itemsPerPage: searchParam.itemsPerPage, currentPage: searchParam.currentPage, totalItems: totalItems }">
+          <td>{{ teacher.firstName }}</td>
+          <td>{{ teacher.lastName }}</td>
+        </tr>
+        </tbody>
+      </table>
+
+      <pagination-controls (pageChange)="searchParam.currentPage = $event; updateTeachers()"></pagination-controls>
+    </div>
+  </div>
+</div>

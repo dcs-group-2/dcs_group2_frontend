@@ -6,6 +6,7 @@ import {TeacherResponse} from '../../core/models/teacher';
 import {TeacherService} from '../../core/services/teacher.service';
 import {FormsModule} from '@angular/forms';
 import {NgForOf, NgIf} from '@angular/common';
+import {RoleService} from '../../core/services/role.service';
 
 @Component({
   selector: 'app-teacher',
@@ -20,6 +21,7 @@ import {NgForOf, NgIf} from '@angular/common';
 })
 export class TeacherComponent implements OnInit {
   isAdmin: boolean = false;
+  userGreeting: string = '';
 
   teachers: TeacherResponse[] = [];
   queue: Subject<SearchDto> = new Subject<SearchDto>();
@@ -27,12 +29,16 @@ export class TeacherComponent implements OnInit {
 
   totalItems = 0;
 
-  constructor(private teacherService: TeacherService) {
+  constructor(private teacherService: TeacherService, private roleService: RoleService) {
   }
 
   ngOnInit(): void {
+    this.isAdmin = this.roleService.isAdmin();
     this.updateTeachers();
     this.queue.pipe(debounceTime(200)).subscribe(() => this.updateTeachers());
+
+    const role = this.roleService.getRole();
+    this.userGreeting = role ? `Hello ${role}` : 'Hello User';
   }
 
   updateTeachers() {

@@ -25,9 +25,6 @@ export class FeedComponent {
   }
 
   isStudent(): boolean {
-    // throw exception to test azure application insights
-    throw new Error('This is a test');
-
     return this.roleService.isStudent();
   }
 

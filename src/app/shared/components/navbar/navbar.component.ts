@@ -1,30 +1,31 @@
-import {Component, OnInit} from '@angular/core';
-import {RoleService} from '../../../core/services/role.service';
-import {RouterLink} from '@angular/router';
+import {Component, computed} from '@angular/core';
+import {AuthService} from '../../../core/services/auth.service';
+import {RouterLink, RouterOutlet} from '@angular/router';
 import {NgIf} from '@angular/common';
 
 @Component({
   selector: 'app-navbar',
   imports: [
     RouterLink,
-    NgIf
+    NgIf,
+    RouterOutlet
   ],
   templateUrl: './navbar.component.html',
   styleUrl: './navbar.component.scss'
 })
-export class NavbarComponent implements OnInit  {
-  username: string = '';
+export class NavbarComponent  {
 
-  constructor(private roleService: RoleService) {
-  }
+  username = computed(() => this.authService.username());
+  isAuthenticated = computed(() => this.authService.isAuthenticated());
 
-  ngOnInit(): void {
-    const role = this.roleService.getRole();
-    this.username = role || 'Unknown';
+  constructor(private authService: AuthService) {}
+
+  logout() {
+    this.authService.logout();
   }
 
   isAdmin(): boolean {
-    return this.roleService.isAdmin();
+    return this.authService.isAdmin();
   }
 
 }

@@ -6,7 +6,7 @@ import {TeacherResponse} from '../../core/models/teacher';
 import {TeacherService} from '../../core/services/teacher.service';
 import {FormsModule} from '@angular/forms';
 import {NgForOf, NgIf} from '@angular/common';
-import {RoleService} from '../../core/services/role.service';
+import {AuthService} from '../../core/services/auth.service';
 
 @Component({
   selector: 'app-teacher',
@@ -29,15 +29,16 @@ export class TeacherComponent implements OnInit {
 
   totalItems = 0;
 
-  constructor(private teacherService: TeacherService, private roleService: RoleService) {
+  constructor(private teacherService: TeacherService, private authService: AuthService) {
   }
 
   ngOnInit(): void {
-    this.isAdmin = this.roleService.isAdmin();
+    this.isAdmin = this.authService.isAdmin();
     this.updateTeachers();
     this.queue.pipe(debounceTime(200)).subscribe(() => this.updateTeachers());
 
-    const role = this.roleService.getRole();
+    // const role = this.authService.getRole();
+    const role = null;
     this.userGreeting = role ? `Hello ${role}` : 'Hello User';
   }
 

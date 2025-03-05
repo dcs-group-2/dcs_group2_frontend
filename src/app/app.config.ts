@@ -1,14 +1,36 @@
 import { ApplicationConfig, provideZoneChangeDetection } from '@angular/core';
 import { provideRouter } from '@angular/router';
 import {provideHttpClient, withInterceptors} from '@angular/common/http'; // Import provideHttpClient
+import { environment } from '../environments/environment';
 
 import { routes } from './app.routes';
 import {roleInterceptor} from './core/interceptors/role.interceptor';
+import {MsalBroadcastService, MsalGuard, MsalService} from '@azure/msal-angular';
+
+import { MSAL_INSTANCE, MsalInterceptor } from '@azure/msal-angular';
+import {
+  PublicClientApplication
+} from '@azure/msal-browser';
+
+export function MSALInstanceFactory(): PublicClientApplication {
+  return new PublicClientApplication({
+    auth: {
+      clientId: environment.msal.clientId,
+      authority: environment.msal.authority,
+      redirectUri: environment.msal.redirectUri
+    }
+  });
+}
 
 export const appConfig: ApplicationConfig = {
   providers: [
     provideZoneChangeDetection({ eventCoalescing: true }),
     provideRouter(routes),
-    provideHttpClient(withInterceptors([roleInterceptor]))
+    provideHttpClient(withInterceptors([roleInterceptor])),
+    { provide: MSAL_INSTANCE, useFactory: MSALInstanceFactory },
+    MsalService,
+    MsalInterceptor,
+    MsalGuard,
+    MsalBroadcastService,
   ]
 };

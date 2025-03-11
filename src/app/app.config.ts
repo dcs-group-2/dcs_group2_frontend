@@ -1,4 +1,4 @@
-import { ApplicationConfig, provideZoneChangeDetection } from '@angular/core';
+import { ApplicationConfig, ErrorHandler, provideZoneChangeDetection } from '@angular/core';
 import { provideRouter } from '@angular/router';
 import {provideHttpClient, withInterceptors} from '@angular/common/http'; // Import provideHttpClient
 import { environment } from '../environments/environment';
@@ -6,6 +6,8 @@ import { environment } from '../environments/environment';
 import { routes } from './app.routes';
 import {roleInterceptor} from './core/interceptors/role.interceptor';
 import {MsalBroadcastService, MsalGuard, MsalService} from '@azure/msal-angular';
+import { ErrorHandlerService } from './core/services/error.service';
+import { AppInsightsMonitoringService } from './core/services/logging.service';
 
 import { MSAL_INSTANCE, MsalInterceptor } from '@azure/msal-angular';
 import {
@@ -32,5 +34,7 @@ export const appConfig: ApplicationConfig = {
     MsalInterceptor,
     MsalGuard,
     MsalBroadcastService,
+    AppInsightsMonitoringService,
+    { provide: ErrorHandler, useClass: ErrorHandlerService },
   ]
 };

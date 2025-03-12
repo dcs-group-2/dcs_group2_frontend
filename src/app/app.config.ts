@@ -19,7 +19,8 @@ export function MSALInstanceFactory(): PublicClientApplication {
     auth: {
       clientId: environment.msal.clientId,
       authority: environment.msal.authority,
-      redirectUri: environment.msal.redirectUri
+      redirectUri: environment.msal.redirectUri,
+      navigateToLoginRequestUrl: false
     }
   });
 }

@@ -21,6 +21,10 @@ export function MSALInstanceFactory(): PublicClientApplication {
       authority: environment.msal.authority,
       redirectUri: environment.msal.redirectUri,
       navigateToLoginRequestUrl: false
+    },
+    cache: {
+      cacheLocation: "sessionStorage",
+      storeAuthStateInCookie: true
     }
   });
 }

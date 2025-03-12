@@ -15,8 +15,8 @@ export class AppComponent implements OnInit {
 
   async ngOnInit() {
     try {
-      await this.msalService.instance.handleRedirectPromise();
       await this.msalService.instance.initialize();
+      await this.msalService.instance.handleRedirectPromise();
     } catch (error) {
       console.error('MSAL initialization error:', error);
     }

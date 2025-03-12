@@ -2,7 +2,6 @@ import {Component, OnInit} from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import {MsalService} from '@azure/msal-angular';
 import { AppInsightsMonitoringService } from './core/services/logging.service';
-import {AuthenticationResult} from '@azure/msal-browser';
 
 @Component({
   selector: 'app-root',
@@ -16,14 +15,8 @@ export class AppComponent implements OnInit {
 
   async ngOnInit() {
     try {
-      this.msalService.instance.handleRedirectPromise().then((response: AuthenticationResult | null) => {
-        if (response !== null && response.account) {
-          this.msalService.instance.setActiveAccount(response.account);
-          console.log('Login successful:', response);
-        }
-      }).catch(error => {
-        console.error('MSAL authentication error:', error);
-      });
+      await this.msalService.instance.initialize();
+      await this.msalService.instance.handleRedirectPromise();
     } catch (error) {
       console.error('MSAL initialization error:', error);
     }

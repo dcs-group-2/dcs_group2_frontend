@@ -10,13 +10,13 @@ import { AppInsightsMonitoringService } from './core/services/logging.service';
   styleUrl: './app.component.scss'
 })
 export class AppComponent implements OnInit {
-  title = 'attendance_frontend';
+  title = 'Attendance Registration';
   constructor(private msalService: MsalService, private monitoringService: AppInsightsMonitoringService) { }
 
   async ngOnInit() {
     try {
-      await this.msalService.instance.initialize();
       await this.msalService.instance.handleRedirectPromise();
+      await this.msalService.instance.initialize();
     } catch (error) {
       console.error('MSAL initialization error:', error);
     }

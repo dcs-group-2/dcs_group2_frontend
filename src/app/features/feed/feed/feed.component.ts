@@ -4,6 +4,7 @@ import {NgForOf, NgIf} from '@angular/common';
 import {Roles} from '../../../core/models/roles-enum';
 import {FeedService} from '../../../core/services/feed.service';
 import {Router} from '@angular/router';
+import {Student, StudentSubmission} from '../../../core/models/attendance';
 
 
 interface DisplayCourse {
@@ -12,6 +13,9 @@ interface DisplayCourse {
   start: string;
   end: string;
   courseId: string;
+  studentSubmitted: boolean;
+  teacherSubmitted: boolean;
+  isAbsent: boolean;
 }
 
 @Component({
@@ -24,7 +28,6 @@ interface DisplayCourse {
   styleUrl: './feed.component.scss'
 })
 export class FeedComponent implements OnInit {
-
   role: string | null;
   upcomingCourses: DisplayCourse[] = [];
 
@@ -46,11 +49,16 @@ export class FeedComponent implements OnInit {
         console.log(response);
         this.upcomingCourses = response.map(course => ({
           id: course.id,
-          name: course.courseName, // Updated field name
-          start: this.formatTime(course.startDate), // Updated field name
-          end: this.formatTime(course.endDate), // Updated field name
+          name: course.courseName,
+          start: this.formatTime(course.startDate),
+          end: this.formatTime(course.endDate),
           courseId: course.courseId,
+          studentSubmitted: course.attendance?.status.attendance === "Present",
+          teacherSubmitted: course.attendance?.teacherStatus.attendance === "Present",
+          isAbsent: course.attendance?.teacherStatus.attendance === "Absent"
         }));
+
+        console.log(this.upcomingCourses);
       },
       error: (error) => {
         console.error('Error fetching courses:', error);
@@ -79,10 +87,47 @@ export class FeedComponent implements OnInit {
   }
 
   markPresAsStudent(course: DisplayCourse): void {
+    const attendancePayload = [{ kind: 'present' }];
+
+    this.feedService.submitAttendanceAsStudent(course.courseId, course.id, attendancePayload).subscribe({
+      next: (response) => {
+        const studentId = this.authService.getAccountId();
+        const currentStudent = response.register.find((entry: Student) => entry.studentId === studentId);
+
+        if (currentStudent) {
+          console.log(response);
+          this.upcomingCourses = this.upcomingCourses.map(existingCourse => {
+            if (existingCourse.id === response.id) {
+              return {
+                ...existingCourse,
+                studentSubmitted: currentStudent.studentSubmission.attendance === "Present",
+                teacherSubmitted: currentStudent.teacherSubmission.attendance === "Present",
+                isAbsent: currentStudent.teacherSubmission.attendance === "Absent"
+              };
+            }
+            return existingCourse;
+          });
+        }
+
+        console.log(this.upcomingCourses)
+      },
+      error: (error) => {
+        console.error('Error submitting attendance:', error);
+      }
+    });
+  }
+
+
+  markPresAsStudent2(course: DisplayCourse): void {
     const attendancePayload = [ { kind: 'present' } ];
     this.feedService.submitAttendanceAsStudent(course.courseId, course.id, attendancePayload).subscribe({
       next: (response) => {
-        console.log('Attendance submitted successfully:', response);
+        console.log(response);
+        const studentId = this.authService.getAccountId();
+        // CHANGE HERE
+
+        const currentStudent = response.register.find((entry: Student) => entry.studentId === studentId);
+        console.log(currentStudent);
       },
       error: (error) => {
         console.error('Error submitting attendance:', error);

@@ -4,22 +4,7 @@ import {NgForOf, NgIf} from '@angular/common';
 import {FeedService} from '../../../../core/services/feed.service';
 import {of, switchMap, tap} from 'rxjs';
 import {FormsModule} from '@angular/forms';
-
-interface StudentSubmission {
-  id: number;
-  studentName: string;
-  studentSubmitted: boolean;
-  teacherSubmitted: boolean;
-  isPresent: boolean;
-  isAbsent: boolean;
-}
-
-interface Student {
-  studentId: number;
-  studentName: string;
-  studentSubmission: { attendance: string };
-  teacherSubmission: { attendance: string };
-}
+import {Student, StudentSubmission} from '../../../../core/models/attendance';
 
 @Component({
   selector: 'app-feed-detail',

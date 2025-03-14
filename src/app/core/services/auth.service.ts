@@ -10,6 +10,7 @@ export class AuthService {
   isAuthenticated = signal(false);
   username = signal<string | null>(null);
   appRoles = signal<string[]>([]);
+  private localAccountId = signal<string | null>(null);
 
   constructor(private msalService: MsalService, private router: Router) {
     this.loadUser();
@@ -21,10 +22,13 @@ export class AuthService {
       this.isAuthenticated.set(true);
       this.username.set(account.name || null);
       this.appRoles.set(account.idTokenClaims['roles'] || []);
+      this.localAccountId.set(account.localAccountId || null);
+
     } else {
       this.isAuthenticated.set(false);
       this.username.set(null);
       this.appRoles.set([]);
+      this.localAccountId.set(null);
     }
   }
 
@@ -57,5 +61,9 @@ export class AuthService {
 
   isTeacher(): boolean {
     return this.appRoles().includes('role.teacher');
+  }
+
+  getAccountId(): string | null {
+    return this.localAccountId();
   }
 }

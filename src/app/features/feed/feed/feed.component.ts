@@ -58,7 +58,6 @@ export class FeedComponent implements OnInit {
           isAbsent: course.attendance?.teacherStatus.attendance === "Absent"
         }));
 
-        console.log(this.upcomingCourses);
       },
       error: (error) => {
         console.error('Error fetching courses:', error);
@@ -95,7 +94,6 @@ export class FeedComponent implements OnInit {
         const currentStudent = response.register.find((entry: Student) => entry.studentId === studentId);
 
         if (currentStudent) {
-          console.log(response);
           this.upcomingCourses = this.upcomingCourses.map(existingCourse => {
             if (existingCourse.id === response.id) {
               return {

@@ -5,19 +5,6 @@ import {Roles} from '../../../core/models/roles-enum';
 import {FeedService} from '../../../core/services/feed.service';
 import {Router} from '@angular/router';
 
-interface CourseData {
-  id: string;
-  course: {
-    id: string;
-    name: string;
-    department: string;
-    teachers: string[];
-    students: string[];
-    sessions: any[];
-  };
-  startTime: string;
-  endTime: string;
-}
 
 interface DisplayCourse {
   id: string;
@@ -37,15 +24,8 @@ interface DisplayCourse {
   styleUrl: './feed.component.scss'
 })
 export class FeedComponent implements OnInit {
-  role: string | null;
-  /*
-  upcomingCourses = [
-    { id: 10, name: 'Mathematics 101', start: '10:00 AM', end: '11:30 AM' },
-    { id: 11, name: 'Physics 202', start: '12:00 PM', end: '1:30 PM' },
-    { id: 12, name: 'Chemistry 303', start: '2:00 PM', end: '3:30 PM' },
-    { id: 13, name: 'History 404', start: '4:00 PM', end: '5:30 PM' }
-  ];*/
 
+  role: string | null;
   upcomingCourses: DisplayCourse[] = [];
 
   constructor(private authService: AuthService, private feedService: FeedService, private router: Router) {
@@ -53,19 +33,23 @@ export class FeedComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    if (this.authService.isAdmin()) {
+      this.router.navigate(['/users']);
+    }
+
     this.fetchCourses();
   }
 
   fetchCourses(): void {
     this.feedService.getAll().subscribe({
-      next: (response: CourseData[]) => {
+      next: (response: any[]) => {
         console.log(response);
         this.upcomingCourses = response.map(course => ({
           id: course.id,
-          name: course.course.name,
-          start: this.formatTime(course.startTime),
-          end: this.formatTime(course.endTime),
-          courseId: course.course.id
+          name: course.courseName, // Updated field name
+          start: this.formatTime(course.startDate), // Updated field name
+          end: this.formatTime(course.endDate), // Updated field name
+          courseId: course.courseId,
         }));
       },
       error: (error) => {
@@ -85,30 +69,28 @@ export class FeedComponent implements OnInit {
     return this.authService.isStudent();
   }
 
+  isTeacher(): boolean {
+    return this.authService.isTeacher();
+  }
+
+  onViewDetails(event: Event, course: DisplayCourse): void {
+    event.stopPropagation(); // Prevents card click
+    this.goToCourseDetails(course);
+  }
+
   markPresAsStudent(course: DisplayCourse): void {
-    this.feedService.submitAttendanceAsStudent(course.courseId, course.id).subscribe({
+    const attendancePayload = [ { kind: 'present' } ];
+    this.feedService.submitAttendanceAsStudent(course.courseId, course.id, attendancePayload).subscribe({
       next: (response) => {
         console.log('Attendance submitted successfully:', response);
-        // Optionally, update the UI to reflect the attendance status
       },
       error: (error) => {
         console.error('Error submitting attendance:', error);
-        // Optionally, display an error message to the user
       }
     });
   }
 
-  logg() {
-    this.feedService.getAll().subscribe({
-      next: (response) => console.log('Response:', response),
-    });
-
-    console.log(this.authService.appRoles());
-    console.log(this.authService.isAuthenticated());
-    console.log(this.authService.username());
-  }
-
   goToCourseDetails(course: any) {
-    this.router.navigate(['/feed', course.id]);
+    this.router.navigate(['/feed', course.courseId, course.id]);
   }
 }

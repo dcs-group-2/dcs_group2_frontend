@@ -1,56 +1,116 @@
 import {Component, OnInit, signal} from '@angular/core';
 import {ActivatedRoute} from '@angular/router';
-import {NgClass, NgForOf, NgIf} from '@angular/common';
+import {NgForOf, NgIf} from '@angular/common';
 import {FeedService} from '../../../../core/services/feed.service';
-import {tap} from 'rxjs';
+import {of, switchMap, tap} from 'rxjs';
+import {FormsModule} from '@angular/forms';
+
+interface StudentSubmission {
+  id: number;
+  studentName: string;
+  studentSubmitted: boolean;
+  teacherSubmitted: boolean;
+  isPresent: boolean;
+  isAbsent: boolean;
+}
+
+interface Student {
+  studentId: number;
+  studentName: string;
+  studentSubmission: { attendance: string };
+  teacherSubmission: { attendance: string };
+}
 
 @Component({
   selector: 'app-feed-detail',
   imports: [NgForOf,
-    NgIf, NgClass],
+    NgIf, FormsModule],
   templateUrl: './feed-detail.component.html',
   styleUrl: './feed-detail.component.scss'
 })
 export class FeedDetailComponent implements OnInit {
 
-  courseId: number | null = null;
-  students = [
-    { id: 1, firstName: 'John', lastName: 'Doe', present: false, alreadyMarked: true },
-    { id: 2, firstName: 'Jane', lastName: 'Smith', present: false, alreadyMarked: false },
-    { id: 3, firstName: 'Emily', lastName: 'Johnson', present: false, alreadyMarked: true },
-    { id: 4, firstName: 'Michael', lastName: 'Brown', present: false, alreadyMarked: false }
-  ];
-
-  attendanceStatus = signal<string | null>(null);
+  courseId: string = "";
+  sessionId: string = "";
+  attendanceData: StudentSubmission[] = [];
 
   constructor(private route: ActivatedRoute, private feedService: FeedService,) {}
 
   ngOnInit() {
-    this.courseId = Number(this.route.snapshot.paramMap.get('id'));
+    this.courseId = this.route.snapshot.paramMap.get('courseId') || '';
+    this.sessionId = this.route.snapshot.paramMap.get('sessionId') || '';
 
-    this.students.forEach(student => {
-      if (student.alreadyMarked) {
-        student.present = true;
+    this.attendanceData.forEach(student => {
+      if (student.teacherSubmitted) {
+        student.isPresent = true;
+      }
+    });
+
+    this.loadStudentData();
+  }
+
+  loadStudentData(): void {
+    this.feedService.getAttendance(this.courseId, this.sessionId).subscribe({
+      next: (response) => {
+        this.attendanceData = response.register.map((student: Student) => ({
+          id: student.studentId,
+          studentName: student.studentName,
+          studentSubmitted: student.studentSubmission.attendance === "Present",
+          teacherSubmitted: student.teacherSubmission.attendance === "Present",
+          isPresent: student.teacherSubmission.attendance === "Present",
+          isAbsent: student.teacherSubmission.attendance === "Absent"
+        }));
+      },
+      error: (error) => {
+        console.error('Error fetching attendance:', error);
       }
     });
   }
 
   sendAttendance() {
-    if (!this.courseId) return;
+    const presentStudents = this.attendanceData
+      .filter(student => student.isPresent)
+      .map(student => ({
+        userId: student.id.toString(),
+        kind: "present"
+      }));
 
-    const presentStudents = this.students.filter(s => s.present);
+    const absentStudents = this.attendanceData
+      .filter(student => !student.isPresent)
+      .map(student => ({
+        userId: student.id.toString(),
+        kind: "absent"
+      }));
 
-    this.feedService.submitAttendance(this.courseId, presentStudents).pipe(
+    let firstRequest$ = absentStudents.length
+      ? this.feedService.submitAttendanceAsTeacher(this.courseId, this.sessionId, absentStudents)
+      : of(null); // If no absent students, skip the first request
+
+    firstRequest$.pipe(
+      switchMap(() => this.feedService.submitAttendanceAsTeacher(this.courseId, this.sessionId, presentStudents)),
       tap({
-        next: () => {
-          this.attendanceStatus.set('Attendance submitted successfully!');
-          presentStudents.forEach(s => s.alreadyMarked = true); // Mark them as already marked
+        next: (response) => {
+          this.attendanceData = this.attendanceData.map(student => {
+            const matchedStudent = response.register.find((entry: Student) => entry.studentId === student.id);
+            return matchedStudent
+              ? {
+              ...student,
+              studentSubmitted: matchedStudent.studentSubmission.attendance === "Present",
+              teacherSubmitted: matchedStudent.teacherSubmission.attendance === "Present",
+              isPresent: matchedStudent.teacherSubmission.attendance === "Present",
+              isAbsent: matchedStudent.teacherSubmission.attendance === "Absent"
+              }
+              : student;
+          });
+
         },
-        error: () => {
-          this.attendanceStatus.set('Failed to submit attendance.');
+        error: (error) => {
+          console.error('Error updating attendance:', error);
         }
       })
     ).subscribe();
   }
+
+
 
 }

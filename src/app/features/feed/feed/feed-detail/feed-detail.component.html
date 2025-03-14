@@ -4,34 +4,27 @@
   <table class="table mt-3">
     <thead>
     <tr>
-      <th>First Name</th>
-      <th>Last Name</th>
-      <th>Present</th>
+      <th>Name</th>
       <th>Status</th>
+      <th>Present</th>
     </tr>
     </thead>
     <tbody>
-    <tr *ngFor="let student of students">
-      <td>{{ student.firstName }}</td>
-      <td>{{ student.lastName }}</td>
+    <tr *ngFor="let student of attendanceData">
+      <td>{{ student.studentName }}</td>
       <td>
-        <input type="checkbox"
-               [checked]="student.present">
+        <span *ngIf="student.isAbsent" class="badge bg-danger">Absent</span>
+        <span *ngIf="!student.isAbsent && !student.teacherSubmitted && student.studentSubmitted" class="badge bg-primary">Marked</span>
+        <span *ngIf="student.teacherSubmitted" class="badge bg-success">Present</span>
+        <span *ngIf="!student.isAbsent && !student.teacherSubmitted && !student.studentSubmitted" class="badge bg-secondary">Pending</span>
       </td>
       <td>
-        <span *ngIf="student.present" class="badge bg-success">Marked</span>
-        <span *ngIf="!student.present" class="badge bg-secondary">Pending</span>
+        <input type="checkbox"
+               [(ngModel)]="student.isPresent">
       </td>
     </tr>
     </tbody>
   </table>
 
   <button class="btn btn-success mt-3" (click)="sendAttendance()">Submit Attendance</button>
-
-  <!-- Status message -->
-  <div *ngIf="attendanceStatus()" class="alert mt-3"
-       [ngClass]="{'alert-success': attendanceStatus() === 'Attendance submitted successfully!',
-                   'alert-danger': attendanceStatus() === 'Failed to submit attendance.'}">
-    {{ attendanceStatus() }}
-  </div>
 </div>

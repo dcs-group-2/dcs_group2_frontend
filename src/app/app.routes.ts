@@ -1,6 +1,5 @@
 import { Routes } from '@angular/router';
-import {TeacherComponent} from './features/teacher/teacher.component';
-import {AdminComponent} from './features/admin/admin.component';
+import {UserComponent} from './features/user/user.component';
 import {FeedComponent} from './features/feed/feed/feed.component';
 import {LoginComponent} from './features/login/login.component';
 import {maslGuard} from './core/guards/masl.guard';
@@ -11,16 +10,17 @@ import {AdminTeacherGuard} from './core/guards/adminteacher.guard';
 
 export const routes: Routes = [
   { path: 'login', component: LoginComponent },
+
   {
     path: '',
     component: NavbarComponent,
-    canActivate: [maslGuard], // Apply the guard here
+    canActivate: [maslGuard],
     children: [
       { path: '', component: FeedComponent },
-      { path: 'feed/:id', component: FeedDetailComponent, canActivate: [AdminTeacherGuard] },
-      { path: 'teacher', component: TeacherComponent, canActivate: [AdminGuard] },
+      { path: 'feed/:courseId/:sessionId', component: FeedDetailComponent, canActivate: [AdminTeacherGuard] },
+      { path: 'users', component: UserComponent, canActivate: [AdminGuard] },
     ],
   },
+
   { path: '**', redirectTo: '' },
 ];
-

@@ -1,5 +1,5 @@
 <nav class="navbar navbar-expand-sm navbar-dark bg-dark mb-3 ps-2 pe-2" *ngIf="isAuthenticated()">
-  <a class="navbar-brand" routerLink="/">Attendance System</a>
+  <a class="navbar-brand ms-3" routerLink="/">Attendly</a>
 
   <!-- Navbar Toggler Button -->
   <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent"
@@ -9,14 +9,8 @@
 
   <div class="collapse navbar-collapse w-100" id="navbarContent">
     <ul class="navbar-nav me-auto mt-2 mt-sm-0">
-      <li class="nav-item">
-        <a class="nav-link" routerLink="/departments">Departments</a>
-      </li>
-      <li class="nav-item">
-        <a class="nav-link" routerLink="/courses">Courses</a>
-      </li>
       <li class="nav-item" *ngIf="isAdmin()">
-        <a class="nav-link" routerLink="/teacher">Teachers</a>
+        <a class="nav-link" routerLink="/users">Users</a>
       </li>
     </ul>
 

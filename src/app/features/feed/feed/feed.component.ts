@@ -46,7 +46,6 @@ export class FeedComponent implements OnInit {
   fetchCourses(): void {
     this.feedService.getAll().subscribe({
       next: (response: any[]) => {
-        console.log(response);
         this.upcomingCourses = response.map(course => ({
           id: course.id,
           name: course.courseName,
@@ -106,26 +105,6 @@ export class FeedComponent implements OnInit {
             return existingCourse;
           });
         }
-
-        console.log(this.upcomingCourses)
-      },
-      error: (error) => {
-        console.error('Error submitting attendance:', error);
-      }
-    });
-  }
-
-
-  markPresAsStudent2(course: DisplayCourse): void {
-    const attendancePayload = [ { kind: 'present' } ];
-    this.feedService.submitAttendanceAsStudent(course.courseId, course.id, attendancePayload).subscribe({
-      next: (response) => {
-        console.log(response);
-        const studentId = this.authService.getAccountId();
-        // CHANGE HERE
-
-        const currentStudent = response.register.find((entry: Student) => entry.studentId === studentId);
-        console.log(currentStudent);
       },
       error: (error) => {
         console.error('Error submitting attendance:', error);

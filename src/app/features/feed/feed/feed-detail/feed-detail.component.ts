@@ -19,7 +19,7 @@ export class FeedDetailComponent implements OnInit {
   sessionId: string = "";
   attendanceData: StudentSubmission[] = [];
 
-  constructor(private route: ActivatedRoute, private feedService: FeedService,) {}
+  constructor(private route: ActivatedRoute, private feedService: FeedService) {}
 
   ngOnInit() {
     this.courseId = this.route.snapshot.paramMap.get('courseId') || '';
@@ -42,7 +42,8 @@ export class FeedDetailComponent implements OnInit {
           studentName: student.studentName,
           studentSubmitted: student.studentSubmission.attendance === "Present",
           teacherSubmitted: student.teacherSubmission.attendance === "Present",
-          isPresent: student.teacherSubmission.attendance === "Present",
+          isPresent: student.teacherSubmission.attendance === "Present" ||
+            (student.studentSubmission.attendance === "Present" && student.teacherSubmission.attendance !== "Absent"),
           isAbsent: student.teacherSubmission.attendance === "Absent"
         }));
       },
@@ -82,12 +83,13 @@ export class FeedDetailComponent implements OnInit {
               ...student,
               studentSubmitted: matchedStudent.studentSubmission.attendance === "Present",
               teacherSubmitted: matchedStudent.teacherSubmission.attendance === "Present",
-              isPresent: matchedStudent.teacherSubmission.attendance === "Present",
+              isPresent: matchedStudent.teacherSubmission.attendance === "Present" ||
+                (matchedStudent.studentSubmission.attendance === "Present" &&
+                  matchedStudent.teacherSubmission.attendance !== "Absent"),
               isAbsent: matchedStudent.teacherSubmission.attendance === "Absent"
               }
               : student;
           });
-
         },
         error: (error) => {
           console.error('Error updating attendance:', error);

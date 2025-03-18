@@ -1,5 +1,5 @@
 <div class="container mt-4">
-  <h3 class="mb-3">Upcoming Courses</h3>
+  <h3 class="mb-3">Upcoming Sessions</h3>
 
   <div class="row">
     <div class="col-md-6 col-lg-4 mb-3" *ngFor="let course of upcomingCourses">
@@ -10,9 +10,22 @@
           <p class="card-text"><strong>End:</strong> {{ course.end }}</p>
 
           <div *ngIf="isStudent()" class="d-flex justify-content-between align-items-center mt-2">
-            <p class="badge bg-warning text-dark m-0">Pending</p>
-            <button class="btn btn-primary btn-sm" (click)="markPresAsStudent(course); $event.stopPropagation()">Mark Presence</button>
+            <span *ngIf="course.isAbsent" class="badge bg-danger">Absent</span>
+            <span *ngIf="!course.isAbsent && !course.teacherSubmitted && course.studentSubmitted" class="badge bg-primary">Marked</span>
+            <span *ngIf="course.teacherSubmitted" class="badge bg-success">Present</span>
+            <span *ngIf="!course.isAbsent && !course.teacherSubmitted && !course.studentSubmitted" class="badge bg-secondary">Pending</span>
+
+            <button class="btn btn-primary btn-sm"
+                    (click)="markPresAsStudent(course); $event.stopPropagation()"
+                    [disabled]="course.teacherSubmitted || course.studentSubmitted || course.isAbsent">
+              Mark Presence
+            </button>
           </div>
+
+          <button *ngIf="isTeacher()" class="btn btn-secondary btn-sm"
+                  (click)="onViewDetails($event, course)">
+            Detail
+          </button>
         </div>
       </div>
     </div>

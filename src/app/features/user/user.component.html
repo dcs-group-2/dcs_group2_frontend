@@ -1,0 +1,33 @@
+<div class="container">
+  <div class="row mt-3">
+    <h1 class="text-center">Users Overview</h1>
+  </div>
+
+  <div class="card mt-3">
+    <div class="card-body">
+      <div class="row mt-3">
+        <input type="text" class="form-control" placeholder="Search User"
+               [(ngModel)]="searchParam" (input)="applyFilter()">
+      </div>
+
+      <!-- Added a responsive table wrapper -->
+      <div class="table-responsive mt-3">
+        <table class="table table-striped">
+          <thead>
+          <tr>
+            <th>Name</th>
+            <th>Email</th>
+          </tr>
+          </thead>
+          <tbody>
+          <tr *ngFor="let user of filteredUsers">
+            <td>{{ user.name }}</td>
+            <td>{{ user.email }}</td>
+          </tr>
+          </tbody>
+        </table>
+      </div>
+
+    </div>
+  </div>
+</div>
